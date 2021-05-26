@@ -1,7 +1,7 @@
-package me.kuuds.modbus.codec;
+package me.kuuds.codec.modbus;
 
 
-public enum ModbusExceptionCode {
+public enum ExceptionCode {
 
     ILLEGAL_FUNCTION(0x01),
     ILLEGAL_DATA_ADDRESS(0x02),
@@ -15,7 +15,7 @@ public enum ModbusExceptionCode {
 
     private final int exceptionCode;
 
-    ModbusExceptionCode(int exceptionCode) {
+    ExceptionCode(int exceptionCode) {
         this.exceptionCode = exceptionCode;
     }
 
@@ -23,7 +23,7 @@ public enum ModbusExceptionCode {
         return exceptionCode;
     }
 
-    public static ModbusExceptionCode fromCode(int code) {
+    public static ExceptionCode fromCode(int code) {
         switch (code) {
             case 0x01:
                 return ILLEGAL_FUNCTION;

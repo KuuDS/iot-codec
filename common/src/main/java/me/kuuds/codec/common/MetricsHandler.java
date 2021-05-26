@@ -11,21 +11,21 @@ import java.util.concurrent.atomic.AtomicLong;
 @ChannelHandler.Sharable
 public class MetricsHandler extends ChannelDuplexHandler {
 
-    private AtomicLong totalConnectionNumber = new AtomicLong();
+    private final AtomicLong totalConnectionCounter = new AtomicLong();
 
     public MetricsHandler(MeterRegistry meterRegistry) {
-        meterRegistry.gauge("totalConnectionNumber", totalConnectionNumber, AtomicLong::doubleValue);
+        meterRegistry.gauge("totalConnectionNumber", totalConnectionCounter, AtomicLong::doubleValue);
     }
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        totalConnectionNumber.incrementAndGet();
+        totalConnectionCounter.incrementAndGet();
         super.channelActive(ctx);
     }
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        totalConnectionNumber.decrementAndGet();
+        totalConnectionCounter.decrementAndGet();
         super.channelInactive(ctx);
     }
 }

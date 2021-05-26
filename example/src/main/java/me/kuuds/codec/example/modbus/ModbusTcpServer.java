@@ -1,23 +1,20 @@
-package me.kuuds.codec.example;
+package me.kuuds.codec.example.modbus;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelPipeline;
 import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioChannelOption;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.handler.flush.FlushConsolidationHandler;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.util.concurrent.DefaultThreadFactory;
 import io.netty.util.concurrent.UnorderedThreadPoolEventExecutor;
 import lombok.extern.slf4j.Slf4j;
 import me.kuuds.codec.common.MetricsHandler;
-import me.kuuds.codec.common.ServerIdleCheckHandler;
 
 import javax.net.ssl.SSLException;
 import java.security.cert.CertificateException;
@@ -44,33 +41,14 @@ public class ModbusTcpServer {
         try {
 
             serverBootstrap.group(bossGroup, workGroup);
+            //metrics
 
             MeterRegistry meterRegistry = new SimpleMeterRegistry();
-            //metrics
             MetricsHandler metricsHandler = new MetricsHandler(meterRegistry);
-            //auth
 
-            //log
-            LoggingHandler debugLogHandler = new LoggingHandler(LogLevel.DEBUG);
-            LoggingHandler infoLogHandler = new LoggingHandler(LogLevel.INFO);
+            ChannelInitializer<SocketChannel> channelInitializer = new ModbusChannelInitializer(metricsHandler);
 
-            serverBootstrap.childHandler(new ChannelInitializer<NioSocketChannel>() {
-                @Override
-                protected void initChannel(NioSocketChannel ch) throws Exception {
-
-                    ChannelPipeline pipeline = ch.pipeline();
-
-                    pipeline.addLast("debugLog", debugLogHandler);
-                    pipeline.addLast("metricHandler", metricsHandler);
-                    pipeline.addLast("idleHandler", new ServerIdleCheckHandler());
-
-                    pipeline.addLast("infoLog", infoLogHandler);
-                    pipeline.addLast("flushEnhance", new FlushConsolidationHandler(10, true));
-
-//                    pipeline.addLast("auth", authHandler);
-//                    pipeline.addLast(businessGroup, );
-                }
-            });
+            serverBootstrap.childHandler(channelInitializer);
 
             ChannelFuture channelFuture = serverBootstrap.bind(8090).sync();
             channelFuture.channel().closeFuture().sync();

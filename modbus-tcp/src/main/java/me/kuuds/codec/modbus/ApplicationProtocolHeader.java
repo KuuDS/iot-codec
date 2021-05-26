@@ -1,6 +1,7 @@
-package me.kuuds.modbus.codec;
+package me.kuuds.codec.modbus;
 
 import lombok.Builder;
+import lombok.Getter;
 
 /**
  *
@@ -24,25 +25,23 @@ import lombok.Builder;
  *     </ol>
  *
  */
-public class ModbusTcpHeader {
+@Getter
+public class ApplicationProtocolHeader {
 
     private final int transactionIdentifier;
     private final int protocolIdentifier;
     private final int length;
     private final int unitIdentifier;
-    private final ModbusFunction function;
 
     @Builder
-    private ModbusTcpHeader(
+    private ApplicationProtocolHeader(
             int transactionIdentifier,
             int protocolIdentifier,
             int unitIdentifier,
-            int length,
-            ModbusFunction function) {
+            int length) {
         this.transactionIdentifier = transactionIdentifier;
         this.protocolIdentifier = protocolIdentifier;
         this.unitIdentifier = unitIdentifier;
-        this.function = function;
         this.length = length;
     }
 

@@ -1,11 +1,21 @@
-package me.kuuds.modbus.codec;
+package me.kuuds.codec.modbus;
 
-public enum ModbusFunction {
+import static me.kuuds.codec.modbus.ProtocolConstants.ERROR_CODE_OFFSET;
+
+public enum FunctionCode {
 
     READ_COILS(0x01, false),
+    EX_READ_COILS(0x01 + ERROR_CODE_OFFSET, false, true),
+
     READ_DISCRETE_INPUTS(0x02, false),
+    EX_READ_DISCRETE_INPUTS(0x02 + ERROR_CODE_OFFSET, true),
+
     READ_HOLDING_REGISTERS(0x03, false),
+    EX_READ_HOLDING_REGISTERS(0x03 + ERROR_CODE_OFFSET, false, true),
+
     READ_INPUT_REGISTERS(0x04, false),
+    EX_READ_INPUT_REGISTERS(0x04 + ERROR_CODE_OFFSET, false, true),
+
     WRITE_SINGLE_COIL(0x05, false),
     WRITE_SINGLE_REGISTER(0x06, false),
     READ_EXCEPTION_STATUS(0x07, true),
@@ -26,10 +36,16 @@ public enum ModbusFunction {
 
     private final int code;
     private final boolean serialOnly;
+    private final boolean error;
 
-    ModbusFunction(int code, boolean serialOnly) {
+    FunctionCode(int code, boolean serialOnly) {
+        this(code, serialOnly, false);
+    }
+
+    FunctionCode(int code, boolean serialOnly, boolean error) {
         this.code = code;
         this.serialOnly = serialOnly;
+        this.error = error;
     }
 
     public int getCode() {
@@ -40,7 +56,11 @@ public enum ModbusFunction {
         return serialOnly;
     }
 
-    public static ModbusFunction fromCode(int code) {
+    public boolean isError() {
+        return error;
+    }
+
+    public static FunctionCode fromCode(int code) {
         switch (code) {
             case 0x01:
                 return READ_COILS;
